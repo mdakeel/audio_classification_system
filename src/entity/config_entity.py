@@ -1,40 +1,49 @@
-import os, sys
+import os
 from dataclasses import dataclass
 from from_root import from_root
-from src.audio.constants import *
+from src.constants import *
 
+# ---------------- Data Ingestion ----------------
 @dataclass
 class DataIngestionConfig:
-    data_ingestion_artifact_dir: str = os.path.join(from_root(), ARTIFACTS_DIR,DATA_INGESTION_ARTIFACTS_DIR)
-    download_dir = os.path.join(data_ingestion_artifact_dir, DATA_DIR_NAME)
-    zip_data_path : str = os.path.join(download_dir, S3_DATA_FOLDER_NAME)
-    unzip_data_dir: str = os.path.join(data_ingestion_artifact_dir, UNZIPPED_FOLDER_NAME)
+    # Artifact directory for ingestion logs/outputs
+    data_ingestion_artifact_dir: str = os.path.join(from_root(), ARTIFACTS_DIR, DATA_INGESTION_ARTIFACTS_DIR)
 
+    # Direct dataset paths (no zip/unzip)
+    dataset_dir: str = os.path.join(from_root(), DATASET_DIR_NAME)          # cats_dogs root folder
+    train_dir: str = os.path.join(dataset_dir, TRAIN_DIR_NAME)              # cats_dogs/train
+    test_dir: str = os.path.join(dataset_dir, TEST_DIR_NAME)                # cats_dogs/test
+
+
+# ---------------- Data Transformation -------
 @dataclass
 class DataTransformationConfig:
-    data_transformation_artifact_dir: str = os.path.join(from_root(), ARTIFACTS_DIR,DATA_TRANSFORMATION_ARTIFACTS_DIR)
-    images_dir = os.path.join(data_transformation_artifact_dir,IMAGES_DIR)
-    test_dir = os.path.join(data_transformation_artifact_dir,TEST_DIR)
+    data_transformation_artifact_dir: str = os.path.join(from_root(), ARTIFACTS_DIR, DATA_TRANSFORMATION_ARTIFACTS_DIR)
+    images_dir: str = os.path.join(data_transformation_artifact_dir, IMAGES_DIR)   # spectrograms folder
+    test_dir: str = os.path.join(data_transformation_artifact_dir, TEST_DIR)       # transformed test folder
 
+
+# ---------- Model Trainer ----------------
 @dataclass
 class ModelTrainerConfig:
-    model_trainer_artifact_dir: str = os.path.join(from_root(), ARTIFACTS_DIR,MODEL_TRAINER_ARTIFACTS_DIR)
-    model_path: str = os.path.join(model_trainer_artifact_dir,MODEL_NAME )
-    transformer_object_path: str = os.path.join(model_trainer_artifact_dir, TRANSFORM_OBJECT_NAME)
+    model_trainer_artifact_dir: str = os.path.join(from_root(), ARTIFACTS_DIR, MODEL_TRAINER_ARTIFACTS_DIR)
+    model_path: str = os.path.join(model_trainer_artifact_dir, MODEL_NAME)                 # trained model path
+    transformer_object_path: str = os.path.join(model_trainer_artifact_dir, TRANSFORM_OBJECT_NAME)  # preprocessing object
 
+
+# ---------------- Model Evaluation ------
 @dataclass
 class ModelEvaluationConfig:
-    s3_model_path: str = S3_BUCKET_MODEL_URI
     model_evaluation_artifacts_dir: str = os.path.join(from_root(), ARTIFACTS_DIR, MODEL_EVALUATION_DIR)
-    best_model_dir: str = os.path.join(model_evaluation_artifacts_dir, S3_MODEL_DIR_NAME)
-    best_model: str = os.path.join(best_model_dir, S3_MODEL_NAME)
+    best_model_dir: str = os.path.join(model_evaluation_artifacts_dir, BEST_MODEL_DIR)
+    best_model: str = os.path.join(best_model_dir, BEST_MODEL_NAME)
 
 
+# ---- Prediction Pipeline ----------------
 @dataclass
 class PredictionPipelineConfig:
-    s3_model_path: str = S3_BUCKET_MODEL_URI
-    prediction_artifact_dir = os.path.join(from_root(),  STATIC_DIR,MODEL_SUB_DIR)
-    model_download_path = os.path.join(prediction_artifact_dir, MODEL_NAME)
-    transforms_path = os.path.join(prediction_artifact_dir, TRANSFORM_OBJECT_NAME)
-    image_path = os.path.join(from_root(),STATIC_DIR, UPLOAD_SUB_DIR,IMAGE_NAME)
-    audio_path_dir = os.path.join(from_root(),STATIC_DIR,UPLOAD_SUB_DIR)
+    prediction_artifact_dir: str = os.path.join(from_root(), STATIC_DIR, MODEL_SUB_DIR)
+    model_download_path: str = os.path.join(prediction_artifact_dir, MODEL_NAME)            # model for inference
+    transforms_path: str = os.path.join(prediction_artifact_dir, TRANSFORM_OBJECT_NAME)     # preprocessing object
+    image_path: str = os.path.join(from_root(), STATIC_DIR, UPLOAD_SUB_DIR, IMAGE_NAME)     # uploaded image path
+    audio_path_dir: str = os.path.join(from_root(), STATIC_DIR, UPLOAD_SUB_DIR)             # uploaded audio path
