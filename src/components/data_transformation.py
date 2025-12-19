@@ -2,13 +2,16 @@ import os
 import sys
 import torch
 import torchaudio
+import soundfile as sf
 from pathlib import Path
 import matplotlib.pyplot as plt
+
 from src.constants import *
 from src.logger import logging
 from src.exception import CustomException
 from src.entity.config_entity import DataTransformationConfig
 from src.entity.artifact_entity import DataTransformationArtifacts
+
 
 class DataTransformation:
     """
@@ -31,6 +34,7 @@ class DataTransformation:
     def load_audio_files(self, folder_path: str, label: str):
         """
         Loads all .wav files from a folder and returns dataset list.
+        Uses soundfile backend to avoid TorchCodec dependency issues.
         """
         try:
             dataset = []
@@ -40,7 +44,9 @@ class DataTransformation:
                 return dataset
 
             for file_path in walker:
-                waveform, sample_rate = torchaudio.load(file_path)
+                # Use soundfile to read audio
+                data, sample_rate = sf.read(file_path, dtype="float32")
+                waveform = torch.tensor(data).unsqueeze(0)  # add channel dimension
                 dataset.append([waveform, sample_rate, label, file_path])
             return dataset
         except Exception as e:
@@ -72,8 +78,14 @@ class DataTransformation:
                     torch.tensor(0.0, device=self.device)
                 )
 
+                # Ensure 2D array for imsave
+                arr = spectrogram_data.detach().cpu().numpy()
+                if arr.ndim == 3:
+                    arr = arr[0]  # take first channel
+                arr = arr.squeeze()
+
                 path_to_save_img = os.path.join(directory, f"spec_img{i}.png")
-                plt.imsave(path_to_save_img, spectrogram_data.cpu().numpy(), cmap='viridis')
+                plt.imsave(path_to_save_img, arr, cmap='viridis')
                 spectrogram_count += 1
 
             logging.info(f"Generated {spectrogram_count} spectrograms for {label_dir} in {directory}")

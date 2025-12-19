@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from src.audio.utils import accuracy
+from src.utils import accuracy
 
 class ImageClassificationBase(nn.Module):
     def training_step(self, batch):

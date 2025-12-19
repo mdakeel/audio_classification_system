@@ -3,10 +3,12 @@ pandas
 from_root
 soundfile
 joblib
+streamlit
 flask
 matplotlib
 torchaudio
 torchvision
+torchcodec
 boto3
 python-dotenv
 -e .
